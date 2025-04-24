@@ -9,13 +9,23 @@ class PersonagemGame:
         self.força = força
         self.guilda = guilda
         self.inventario = []
+        self.defendendo = False
 
     def atacar(self, outro):
-        dano = random.randint(int(self.força * 0.8), self.força)
-        print(f"{self.nome} da guilda {self.guilda} ataca {outro.nome} causando {dano} de dano!")
+        dano_base = random.randint(int(self.força * 0.8), self.força)
+        if outro.defendendo:
+            dano = int(dano_base / 2)
+            print(f"{outro.nome} defendeu! O dano foi reduzido para {dano}.")
+        else:
+            dano = dano_base
+        print(f"{self.nome} ataca {outro.nome} causando {dano} de dano!")
         outro.vida -= dano
         if outro.vida < 0:
             outro.vida = 0
+
+    def defender(self):
+        self.defendendo = True
+        print(f"{self.nome} está se defendendo neste turno!")
 
     def status(self):
         print(f"\n👤 Personagem: {self.nome}")
@@ -25,16 +35,34 @@ class PersonagemGame:
         print(f"💪 Força: {self.força}")
         print(f"🎒 Inventário: {self.inventario}")
 
-def batalha(p1, p2):
-    print("\n⚔️ BATALHA ENTRE GUILDAS ⚔️")
+def turno_jogador(jogador, oponente):
+    print(f"\n🔁 Turno de {jogador.nome} ({jogador.guilda})")
+    print("Escolha sua ação:")
+    print("1 - Atacar")
+    print("2 - Defender")
+    escolha = input("Digite o número da ação: ")
+
+    jogador.defendendo = False  # resetar defesa a cada turno
+
+    if escolha == "1":
+        jogador.atacar(oponente)
+    elif escolha == "2":
+        jogador.defender()
+    else:
+        print("Ação inválida! Você perdeu o turno.")
+
+def batalha_interativa(p1, p2):
+    print("\n⚔️ BATALHA INTERATIVA ENTRE GUILDAS ⚔️")
+    input("Pressione ENTER para começar a batalha...")
+
     rodada = 1
     while p1.vida > 0 and p2.vida > 0:
         print(f"\n--- Rodada {rodada} ---")
         if rodada % 2 == 1:
-            p1.atacar(p2)
+            turno_jogador(p1, p2)
         else:
-            p2.atacar(p1)
-        time.sleep(1)  # Dá emoção à batalha
+            turno_jogador(p2, p1)
+        time.sleep(1)
         p1.status()
         p2.status()
         rodada += 1
@@ -43,11 +71,11 @@ def batalha(p1, p2):
     vencedor = p1 if p1.vida > 0 else p2
     print(f"🎉 {vencedor.nome} da guilda {vencedor.guilda} venceu a batalha!")
 
-# Criando os personagens com guilda e ranking
+# Criando personagens
 samurai = PersonagemGame("Hiroshi", "Surreal", 110, 23, "Samurais Extintos")
 spartano = PersonagemGame("Kratos", "Diamante", 120, 21, "Destruidores")
 
-# Adicionando itens ao inventário
+# Adicionando itens
 samurai.inventario.extend(["Katana Lendária", "Furos de estiragem"])
 spartano.inventario.extend(["Lâminas do Caos", "Os Olhos da Verdade"])
 
@@ -57,4 +85,4 @@ samurai.status()
 spartano.status()
 
 # Iniciar batalha
-batalha(samurai, spartano)
+batalha_interativa(samurai, spartano)
